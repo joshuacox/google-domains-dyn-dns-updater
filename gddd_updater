@@ -18,7 +18,7 @@ config_checker $HOME/.google_domains_dynamic/config
 
 # Check update ip cache path and ensure it exists
 : ${updater_ip_cache_path:=$HOME/.google_domains_dynamic}
-mkdir -p $updater_ip_cache_path
+mkdir -p "$updater_ip_cache_path"
 : ${updater_ip_cache:=$updater_ip_cache_path/last_ip}
 
 # Ensure our configs set these variables
@@ -39,7 +39,7 @@ fi
 if [[ -f "${updater_ip_cache}" ]]; then
   last_IP=$( cat ${updater_ip_cache})
 else
-  last_IP=none
+  last_IP="no ip set"
 fi
 
 # Resolve current public IP
@@ -48,16 +48,16 @@ IP=$( dig +short myip.opendns.com @resolver1.opendns.com )
 # Check the two IPs to see if they are equal
 if [[ "$last_IP" != "$IP" ]]; then
   # They are not equal so update the IP
-  echo "$IP" > ${updater_ip_cache}
+  echo "$IP" > "${updater_ip_cache}"
   # Update Google DNS Record
   AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0"
   URL="https://${GOOGLE_DOMAINS_USERNAME}:${GOOGLE_DOMAINS_PASSWORD}@domains.google.com/nic/update?hostname=${GOOGLE_DOMAINS_HOSTNAME}&myip=${IP}"
   #RESULT=$(curl -A "$AGENT" -s "$URL")
   RESULT=$(curl -A "$AGENT" -s "$URL")
   if [[ "$RESULT" == "good $IP" ]]; then
-    echo Successful Update -- $RESULT
+    echo "Successful Update -- $RESULT"
   elif [[ "$RESULT" == "nochg $IP" ]]; then
-    echo No Change -- $RESULT
+    echo "No Change -- $RESULT"
   else
     echo "Failure result = $RESULT"
     exit 1
