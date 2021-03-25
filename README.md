@@ -19,7 +19,13 @@ You can also use an alternative system wide path to the config if you wish:
 
 Of note, settings in `$HOME/.google_domains_dynamic/config` will override the system wide settings.
 
+## Usage
+
+Invoking `gddd_updater` will update your IP if it has changed, and will do nothing if not.
+
 ## Example crontab
+
+Invoke it daily from cron:
 
 ```
 0 0 * * * /usr/local/bin/gddd_updater
