@@ -48,10 +48,12 @@ IP=$( dig +short myip.opendns.com @resolver1.opendns.com )
 # Check the two IPs to see if they are equal
 if [[ "$last_IP" != "$IP" ]]; then
   # They are not equal so update the IP
-  echo "$IP" > ${updater_ip_cache_path}
+  echo "$IP" > ${updater_ip_cache}
   # Update Google DNS Record
+  AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0"
   URL="https://${GOOGLE_DOMAINS_USERNAME}:${GOOGLE_DOMAINS_PASSWORD}@domains.google.com/nic/update?hostname=${GOOGLE_DOMAINS_HOSTNAME}&myip=${IP}"
-  RESULT=$(curl -s $URL)
+  #RESULT=$(curl -A "$AGENT" -s "$URL")
+  RESULT=$(curl -A "$AGENT" -s "$URL")
   if [[ "$RESULT" == "good $IP" ]]; then
     echo Successful Update -- $RESULT
   elif [[ "$RESULT" == "nochg $IP" ]]; then
