@@ -43,7 +43,20 @@ else
 fi
 
 # Resolve current public IP
-IP=$( dig +short myip.opendns.com @resolver1.opendns.com )
+IP=$(curl -s -4 checkip.amazonaws.com)
+
+if [[ -z $IP ]]; then
+  IP=$(curl -s -4 icanhazip.com)
+fi
+if [[ -z $IP ]]; then
+  IP=$( dig +short myip.opendns.com @resolver1.opendns.com )
+fi
+if [[ -z $IP ]]; then
+  echo "IP is $IP empty! Investigate IP fetch methods"
+  exit 1
+else
+  echo "IP is $IP"
+fi
 
 # Check the two IPs to see if they are equal
 if [[ "$last_IP" != "$IP" ]]; then
@@ -52,7 +65,6 @@ if [[ "$last_IP" != "$IP" ]]; then
   # Update Google DNS Record
   AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0"
   URL="https://${GOOGLE_DOMAINS_USERNAME}:${GOOGLE_DOMAINS_PASSWORD}@domains.google.com/nic/update?hostname=${GOOGLE_DOMAINS_HOSTNAME}&myip=${IP}"
-  #RESULT=$(curl -A "$AGENT" -s "$URL")
   RESULT=$(curl -A "$AGENT" -s "$URL")
   if [[ "$RESULT" == "good $IP" ]]; then
     echo "Successful Update -- $RESULT"
