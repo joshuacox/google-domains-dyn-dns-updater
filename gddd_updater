@@ -43,10 +43,13 @@ else
 fi
 
 # Resolve current public IP
-IP=$(curl -s -4 checkip.amazonaws.com)
+IP=$(curl -sL -4 checkip.amazonaws.com)
 
 if [[ -z $IP ]]; then
-  IP=$(curl -s -4 icanhazip.com)
+  IP=$(curl -sL -4 icanhazip.com)
+fi
+if [[ -z $IP ]]; then
+  IP=$(curl -sL -4 wtfismyip.com/text)
 fi
 if [[ -z $IP ]]; then
   IP=$( dig +short myip.opendns.com @resolver1.opendns.com )
