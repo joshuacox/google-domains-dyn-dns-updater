@@ -42,18 +42,64 @@ else
   last_IP="no ip set"
 fi
 
-# Resolve current public IP
-IP=$(curl -sL -4 checkip.amazonaws.com)
+curlr () {
+  #echo $1
+  IP=$(curl -sL -4 $1)
+}
 
-if [[ -z $IP ]]; then
-  IP=$(curl -sL -4 icanhazip.com)
-fi
-if [[ -z $IP ]]; then
-  IP=$(curl -sL -4 wtfismyip.com/text)
-fi
-if [[ -z $IP ]]; then
+aws () {
+  echo aws
+  curlr checkip.amazonaws.com
+}
+icanhazip () {
+  echo icanhazip 
+  curlr icanhazip.com
+}
+wtfismyip () {
+  echo wtfismyip
+  curlr wtfismyip.com/text
+}
+opendns () {
+  echo opendns
   IP=$( dig +short myip.opendns.com @resolver1.opendns.com )
+}
+googlens1 () {
+  echo opendns
+  IP=$(dig -4 TXT +short o-o.myaddr.l.google.com @ns1.google.com)
+}
+dnsomatic () {
+  echo wtfismyip
+  curlr https://myip.dnsomatic.com
+}
+opendns2jq () {
+  echo opendns
+  IP=$(curl -sL -4 https://myipv4.p1.opendns.com/get_my_ip | jq '.ip')
+}
+
+ip_methods=("aws")
+ip_methods+=("icanhazip")
+ip_methods+=("wtfismyip")
+ip_methods+=("opendns")
+ip_methods+=("googlens1")
+ip_methods+=("dnsomatic")
+which jq > /dev/null
+if [[ $? -eq 0 ]]; then
+  ip_methods+=("opendns2jq")
 fi
+#echo ${ip_methods[@]}
+IP=''
+count=0
+while [[ -z $IP ]]; do
+  export IP_method=${ip_methods[ $RANDOM % ${#ip_methods[@]} ]}
+  # Resolve current public IP
+  ${IP_method}
+  ((++count))
+  if [[ $count -gt 10 ]]; then
+    echo something wrong. aborting
+    exit 1
+  fi
+done
+
 if [[ -z $IP ]]; then
   echo "IP is $IP empty! Investigate IP fetch methods"
   exit 1
